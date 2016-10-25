@@ -1,0 +1,80 @@
+body { 
+	font: 13px Helvetica, Arial; 
+}
+
+p {
+	margin-top:0;
+	margin-bottom:0
+}
+
+#chatWindow {
+	position: fixed;
+	width: 300px;
+	height: 400px;
+	background: #FFF;
+	border: 1px #000 solid;
+	right: 0;
+	bottom: 10px;
+	display: normal;
+
+}
+
+#minChat {
+	position: fixed;
+	width: 300px;
+	height: 50px;
+	background: rgb(130, 224, 255);
+	border: 1px #000 solid;
+	right: 0;
+	bottom: 10px;
+	display: normal;
+}
+
+#chatMenu {
+	position: inline;
+	border-bottom: 1px #AAA solid;
+	background: #DDD;
+}
+
+#minButton {
+	position: inline;
+	padding-left: 10px;
+	padding-right: 10px;
+	margin-left: 5px;
+	margin-top: 5px;
+	margin-bottom: 5px;
+	background: #EEE;
+    border: none;
+}
+
+#messages {
+	list-style-type: none; 
+	margin: 0; 
+	padding: 0;
+}
+
+#messages li {
+	padding: 5px 10px;
+}
+
+#messages li:nth-child(odd) { 
+	background: #eee; 
+}
+
+#m {
+	position: absolute;
+	bottom: 10px;
+	left: 10px;
+	width: 200px;
+	height: 25px;
+}
+
+#sendButton { 
+	position: absolute;
+	bottom: 10px;
+	right: 10px;
+	width: 20%; 
+	background: rgb(130, 224, 255);
+	border: none;
+	padding: 10px;
+}

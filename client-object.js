@@ -18,9 +18,13 @@ var spawnPosition = {"x": 2, "y": 1.5, "z": 1};
 var spawnOrientation = [{"x": 0, "y": 1, "z": 0}, 0];
 var x3d;
 var bundleObj;
+var myPos;
+var myRot;
+var sendButton;
+var formDiv;
 
 //Use for localhost testing. Run node server 
-socket = new io.connect('http://metagrid2.sv.vt.edu:8888');
+socket = new io.connect('http://metagrid2.sv.vt.edu:9999');
 
 /*
  * Initialized by client.js to get the user's name
@@ -70,9 +74,68 @@ function positionUpdated(e)
 	socket.emit('updateposition', name, pos, rot);
 }
 
+function sendMessage() {
+	
+	var inputField = document.getElementById('m');
+	var message = inputField.value;
+	
+	if (message != "") {
+		
+		console.log("Sending a Message!");
+		socket.emit('chatmessage', message);
+
+		inputField.value = "";
+	}
+}
+
 //-----------------------------
 // Listeners
 //-----------------------------
+
+window.onload = function (e) {
+	sendButton = document.getElementById("sendButton");
+	sendButton.addEventListener('click', sendMessage);
+	
+	smallForm = document.getElementById("minChat");
+	
+	formDiv = document.getElementById("chatWindow");
+	formDiv.addEventListener('keypress', function(e) {
+		
+		if(e.keyCode == 13) {
+		
+			sendMessage();
+		
+		}
+	});
+	
+	/*var minButton = document.getElementById("minButton");
+	
+	console.log(minButton);
+	
+	minButton.addEventListener('click', function(e) {
+		
+		if (formDiv.style.display != 'none') {
+		
+			console.log("Hide Window");
+			formDiv.removeChild(minButton);
+			formDiv.style.display = "none";
+			
+			minButton.innerHTML = "+";
+			smallForm.appendChild(minButton);
+			smallForm.style.display = "normal";
+			
+		} else {
+			console.log("Max Window");
+			
+		    smallForm.style.display = "none";
+			minButton.innerHTML = "-";
+			smallForm.removeChild(minButton);
+			
+			formDiv.style.display = 'none';
+			formDiv.appendChild(minButton);
+		}
+	})*/
+};
 
 window.addEventListener('keypress', function(e) {
 	
@@ -148,6 +211,8 @@ socket.on('firstupdate', function(fullListOfUsers)
 			userBundle.setAttribute("id", key + "Bundle");
 			userBundle.setAttribute("translation", current[1].x + " " + current[1].y + " " + current[1].z);
 			userBundle.setAttribute("rotation", current[2][0].x + " " + current[2][0].y + " " + current[2][0].z + " " + current[2][1]);
+			myPos = current[1];
+			myRot = current[2];
 			
 			var scene = document.getElementsByTagName("Scene")[0];
 			
@@ -260,4 +325,15 @@ socket.on('deleteuser', function(removableUser)
     
     //Remove User's HTML Content
     removeUser(removableUser);
+});
+
+/*
+ * Triggered when a message has been posted to the chatroom
+ *
+ */
+socket.on('newmessage', function(message)
+{
+	var newMessage = document.createElement('li');
+	newMessage.appendChild(document.createTextNode(message));
+	document.getElementById("messages").appendChild(newMessage);
 });
