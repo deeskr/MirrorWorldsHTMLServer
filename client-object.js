@@ -74,9 +74,9 @@ function positionUpdated(e)
 	socket.emit('updateposition', name, pos, rot);
 }
 
-function sendMessage() {
+function sendMessage(m) {
 	
-	var inputField = document.getElementById('m');
+    var inputField = document.getElementById('m');
 	var message = inputField.value;
 	
 	if (message != "") {
@@ -96,9 +96,9 @@ window.onload = function (e) {
 	sendButton = document.getElementById("sendButton");
 	sendButton.addEventListener('click', sendMessage);
 	
-	smallForm = document.getElementById("minChat");
-	
+	smallForm = document.getElementById("smallForm");
 	formDiv = document.getElementById("chatWindow");
+    
 	formDiv.addEventListener('keypress', function(e) {
 		
 		if(e.keyCode == 13) {
@@ -108,34 +108,29 @@ window.onload = function (e) {
 		}
 	});
 	
-	/*var minButton = document.getElementById("minButton");
-	
-	console.log(minButton);
+	var minButton = document.getElementById("minButton");
+    var maxButton = document.getElementById("maxButton");
 	
 	minButton.addEventListener('click', function(e) {
 		
-		if (formDiv.style.display != 'none') {
-		
-			console.log("Hide Window");
-			formDiv.removeChild(minButton);
-			formDiv.style.display = "none";
+        if (formDiv.style.visibility != "hidden") {
+                               
+			formDiv.style.visibility = "hidden";
+			smallForm.style.visibility = "visible";
 			
-			minButton.innerHTML = "+";
-			smallForm.appendChild(minButton);
-			smallForm.style.display = "normal";
-			
-		} else {
-			console.log("Max Window");
-			
-		    smallForm.style.display = "none";
-			minButton.innerHTML = "-";
-			smallForm.removeChild(minButton);
-			
-			formDiv.style.display = 'none';
-			formDiv.appendChild(minButton);
 		}
-	})*/
-};
+    });
+    
+    maxButton.addEventListener('click', function(e) {
+        
+        if (smallForm.style.visibility != 'hidden') {
+                               
+            smallForm.style.visibility = "hidden";
+            formDiv.style.visibility = "visible";
+                               
+        }
+    });
+}
 
 window.addEventListener('keypress', function(e) {
 	
@@ -180,7 +175,7 @@ socket.on('firstupdate', function(fullListOfUsers)
 		fullListOfUsers[name] = bundleObj;
 	
 	}
-	
+          
 	// Adds Avatar to X3D scene for new user
 	var avatarGroup = document.getElementById("avatarGroup");
 	avatarGroup.innerHTML = "";
@@ -229,6 +224,9 @@ socket.on('firstupdate', function(fullListOfUsers)
 	
 	//Tell the server the user's spawn location data
 	socket.emit('login', name, spawnPosition, spawnOrientation);
+          
+    var welcomeMessage = "" + name + " is joining the scene.";
+    socket.emit('chatmessage', welcomeMessage);
 });
 
 /*
@@ -333,7 +331,7 @@ socket.on('deleteuser', function(removableUser)
  */
 socket.on('newmessage', function(message)
 {
-	var newMessage = document.createElement('li');
+    var newMessage = document.createElement('li');
 	newMessage.appendChild(document.createTextNode(message));
 	document.getElementById("messages").appendChild(newMessage);
 });

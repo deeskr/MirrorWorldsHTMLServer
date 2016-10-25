@@ -1,4 +1,5 @@
-body { 
+body {
+    margin: 0 auto;
 	font: 13px Helvetica, Arial; 
 }
 
@@ -7,50 +8,66 @@ p {
 	margin-bottom:0
 }
 
+#x3d {
+    max-height: 80%;
+    max-width: 90%;
+    min-height: 400px;
+    min-width: 700px;
+}
+
+#x3dContent {
+    height: 100%;
+    width: 100%;
+}
+
+#info {
+    display: inline-block;
+    margin-top: 10px;
+    margin-left: 5px;
+}
+
 #chatWindow {
 	position: fixed;
 	width: 300px;
-	height: 400px;
+    top: 0;
 	background: #FFF;
-	border: 1px #000 solid;
 	right: 0;
-	bottom: 10px;
-	display: normal;
-
+    bottom: 0;
+	visibility: visible;
+    display: inline-block;
 }
 
-#minChat {
-	position: fixed;
-	width: 300px;
-	height: 50px;
-	background: rgb(130, 224, 255);
-	border: 1px #000 solid;
-	right: 0;
-	bottom: 10px;
-	display: normal;
+#smallForm {
+    position: fixed;
+    bottom: 0;
+    height: 100%;
+    background: #DDD;
+    right: 0;
+    visibility: hidden;
+    display: inline-block;
 }
 
-#chatMenu {
+.minmaxB {
 	position: inline;
-	border-bottom: 1px #AAA solid;
-	background: #DDD;
-}
-
-#minButton {
-	position: inline;
+    height: 100%;
+    width: 30px;
 	padding-left: 10px;
 	padding-right: 10px;
-	margin-left: 5px;
-	margin-top: 5px;
-	margin-bottom: 5px;
-	background: #EEE;
+    background: #DDD;
     border: none;
+}
+
+#messageBlock {
+    
+    width: 90%;
+    height: 100%;
 }
 
 #messages {
 	list-style-type: none; 
 	margin: 0; 
 	padding: 0;
+    top: 0;
 }
 
 #messages li {
@@ -64,17 +81,17 @@ p {
 #m {
 	position: absolute;
 	bottom: 10px;
-	left: 10px;
-	width: 200px;
+	left: 35px;
+	width: 190px;
 	height: 25px;
 }
 
 #sendButton { 
 	position: absolute;
 	bottom: 10px;
-	right: 10px;
-	width: 20%; 
+    right: 10px;
+    height: 30px;
+	width: 50px;
 	background: rgb(130, 224, 255);
 	border: none;
-	padding: 10px;
 }

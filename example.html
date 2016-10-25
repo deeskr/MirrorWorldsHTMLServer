@@ -21,9 +21,8 @@
 <body onload = "init()">
 	<h1>Testing</h1>
 	
-	<div id='x3d' style="height: 768px; width: 1024px;">
-	
-		<X3D width="1024px" height="768px">
+	<div id='x3d'>
+		<X3D id="x3dContent">
 			<Scene>
                 <Transform DEF='dad_Box1' translation='0 -.5 0'>
                     <Shape DEF='Box1' containerField='children'>
@@ -78,12 +77,16 @@
 		<span id="users">Loading...</span>
 	</div>
 	
-	<div id="chatWindow">
-		<div id="chatMenu">
-			<button id="minButton">_</button>
-		</div>
-		<ul id="messages"></ul>
-		<input id="m" autocomplete="off" /><button id="sendButton">Send</button>
+    <div id="smallForm" style="visibility: hidden">
+        <button id="maxButton" class="minmaxB"><b> < </b></button>
+    </div>
+    
+	<div id="chatWindow" style="visibility: visible">
+        <button id="minButton" class="minmaxB"><b> > </b></button>
+        <div id="messageBlock">
+            <ul id="messages"></ul>
+            <input id="m" autocomplete="off" /><button id="sendButton">Send</button>
+        </div>
 	</div>
         
 </body>
