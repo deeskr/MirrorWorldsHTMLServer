@@ -74,24 +74,32 @@ function positionUpdated(e)
 	socket.emit('updateposition', name, pos, rot);
 }
 
-function sendMessage(m) {
+/*
+ * Sends the specified message to all connected users
+ */
+function sendMessage(memo) {
 	
-    var inputField = document.getElementById('m');
-	var message = inputField.value;
+	var message = memo;
 	
-	if (message != "") {
+	if (message == null) {
 		
-		console.log("Sending a Message!");
-		socket.emit('chatmessage', message);
-
-		inputField.value = "";
+		message = document.getElementById('inputField').value;
+		document.getElementById('inputField').value = "";
+		
 	}
+	
+	console.log("Sending a Message!");
+	socket.emit('chatmessage', name, message);
+	
 }
 
 //-----------------------------
 // Listeners
 //-----------------------------
 
+/*
+ * Minimize/Maximize Chat Widget
+ */
 window.onload = function (e) {
 	sendButton = document.getElementById("sendButton");
 	sendButton.addEventListener('click', sendMessage);
@@ -132,6 +140,10 @@ window.onload = function (e) {
     });
 }
 
+
+/*
+ * Change Camera View
+ */
 window.addEventListener('keypress', function(e) {
 	
 	var avatar = document.getElementById(name + "Avatar");
@@ -214,6 +226,10 @@ socket.on('firstupdate', function(fullListOfUsers)
 			scene.appendChild(userBundle);
 			userBundle.appendChild(userAvatar);
 
+			//Add a message to the chat window that someone is joining
+			var welcomeMessage = "" + name + " is joining the scene.";
+			sendMessage(welcomeMessage);
+			
 		} else {
 			avatarGroup.appendChild(userAvatar)
 		}
@@ -224,9 +240,7 @@ socket.on('firstupdate', function(fullListOfUsers)
 	
 	//Tell the server the user's spawn location data
 	socket.emit('login', name, spawnPosition, spawnOrientation);
-          
-    var welcomeMessage = "" + name + " is joining the scene.";
-    socket.emit('chatmessage', welcomeMessage);
+    
 });
 
 /*
@@ -323,15 +337,42 @@ socket.on('deleteuser', function(removableUser)
     
     //Remove User's HTML Content
     removeUser(removableUser);
+	
+	//Add a message to the chat window that someone is leaving
+    var goodbyeNote = "" + removableUser[0] + " is leaving the scene.";
+    sendMessage(goodbyeNote);
 });
 
 /*
  * Triggered when a message has been posted to the chatroom
  *
  */
-socket.on('newmessage', function(message)
+socket.on('newmessage', function(userName, message)
 {
-    var newMessage = document.createElement('li');
+	var newMessage = document.createElement('li');
+	
+	var nameTag = document.createElement('span');
+	nameTag.innerHTML = "<em>" + userName + "</em>";
+	
+	newMessage.appendChild(nameTag);
+	newMessage.appendChild(document.createElement("br"));
 	newMessage.appendChild(document.createTextNode(message));
+	
 	document.getElementById("messages").appendChild(newMessage);
 });
+
+
+/*
+ * Triggered when a notification has been posted to the chatroom
+ *
+
+socket.on('notification', function(userName, message) {
+	
+	var note = document.createElement('li');
+	
+	var noteText = document.createElement('span');
+	noteText.innerHTML = "<em>" + message + "</em>";
+	
+	document.getElementById("messages").appendChild(note);
+});
+ */

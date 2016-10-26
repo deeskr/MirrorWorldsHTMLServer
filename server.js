@@ -67,10 +67,20 @@ io.on('connection', function (socket)
   /*
   * Recieved when a client sends a chat message
   */
-  socket.on('chatmessage', function(message)
+  socket.on('chatmessage', function(name, message)
   {
 	  console.log("Message Recieved: ", message);
-	  io.emit('newmessage', message);
+	  io.emit('newmessage', name, message);
+	  
+  });
+  
+ /*
+  * Recieved when a client sends out a notification 
+  */
+  socket.on('newnote', function(name, message)
+  {
+	  console.log("Message Recieved: ", message);
+	  io.emit('notification', name, message);
 	  
   });
  

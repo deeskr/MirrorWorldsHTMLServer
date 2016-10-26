@@ -50,15 +50,19 @@ p {
 .minmaxB {
 	position: inline;
     height: 100%;
-    width: 30px;
+    width: 10%;
 	padding-left: 10px;
 	padding-right: 10px;
+	margin-left: 0px;
+	margin-top: 0px;
+	margin-bottom: 0px;
     background: #DDD;
     border: none;
 }
 
 #messageBlock {
-    
+	position: absolute;
+    display: inline;
     width: 90%;
     height: 100%;
 }
@@ -78,7 +82,7 @@ p {
 	background: #eee; 
 }
 
-#m {
+#inputField {
 	position: absolute;
 	bottom: 10px;
 	left: 35px;
