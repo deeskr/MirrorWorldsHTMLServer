@@ -179,7 +179,7 @@ socket.on('connect', function()
  *
  * @param fullListOfUsers - the list of connected users
  */
-socket.on('firstupdate', function(fullListOfUsers)
+socket.once('firstupdate', function(fullListOfUsers)
 {
 	//Add your own Name and information to fullListOfUsers
 	if(fullListOfUsers[0] === undefined) {
@@ -225,11 +225,11 @@ socket.on('firstupdate', function(fullListOfUsers)
 			
 			scene.appendChild(userBundle);
 			userBundle.appendChild(userAvatar);
-
-			//Add a message to the chat window that someone is joining
-			var welcomeMessage = "" + name + " is joining the scene.";
-			sendMessage(welcomeMessage);
-			
+            
+            //Add a message to the chat window that someone is joining
+            var welcomeMessage = "" + name + " is joining the scene.";
+            socket.emit('newnote', welcomeMessage);
+            
 		} else {
 			avatarGroup.appendChild(userAvatar)
 		}
@@ -241,6 +241,7 @@ socket.on('firstupdate', function(fullListOfUsers)
 	//Tell the server the user's spawn location data
 	socket.emit('login', name, spawnPosition, spawnOrientation);
     
+
 });
 
 /*
@@ -339,8 +340,8 @@ socket.on('deleteuser', function(removableUser)
     removeUser(removableUser);
 	
 	//Add a message to the chat window that someone is leaving
-    var goodbyeNote = "" + removableUser[0] + " is leaving the scene.";
-    sendMessage(goodbyeNote);
+    
+    //socket.emit('newnote', goodbyeNote);
 });
 
 /*
@@ -364,15 +365,15 @@ socket.on('newmessage', function(userName, message)
 
 /*
  * Triggered when a notification has been posted to the chatroom
- *
-
-socket.on('notification', function(userName, message) {
+ */
+socket.on('notification', function(message) {
 	
 	var note = document.createElement('li');
 	
 	var noteText = document.createElement('span');
 	noteText.innerHTML = "<em>" + message + "</em>";
+    
+    note.appendChild(noteText);
 	
 	document.getElementById("messages").appendChild(note);
 });
- */

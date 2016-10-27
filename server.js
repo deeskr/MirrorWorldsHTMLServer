@@ -77,10 +77,10 @@ io.on('connection', function (socket)
  /*
   * Recieved when a client sends out a notification 
   */
-  socket.on('newnote', function(name, message)
+  socket.on('newnote', function(message)
   {
 	  console.log("Message Recieved: ", message);
-	  io.emit('notification', name, message);
+	  io.emit('notification', message, users);
 	  
   });
  
@@ -132,16 +132,17 @@ io.on('connection', function (socket)
 
  /*
   * Recieved when a client disconnects (closes their browser window/tab).
-  *
-  * @param name - client's username
-  * @param pos - client's start position in the scene
-  * @param rot - client's start rotation in the scene
   */
   socket.on('disconnect', function()
   {
-	  // Inform all clients to update and account for the removed user.
+      console.log("Username: ", users[socket.username][0]);
+      
+      var goodbyeNote = "" + users[socket.username][0] + " is leaving the scene.";
+	  io.emit('notification', goodbyeNote, users);
+      
+        // Inform all clients to update and account for the removed user.
 	  io.emit('deleteuser', users[socket.username]);
-	  
+      
 	  // Remove the client from the master list
 	  delete users[socket.username];
   });
