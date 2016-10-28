@@ -18,9 +18,13 @@ var spawnPosition = {"x": 2, "y": 1.5, "z": 1};
 var spawnOrientation = [{"x": 0, "y": 1, "z": 0}, 0];
 var x3d;
 var bundleObj;
+var myPos;
+var myRot;
+var sendButton;
+var formDiv;
 
 //Use for localhost testing. Run node server 
-socket = new io.connect('http://metagrid2.sv.vt.edu:8888');
+socket = new io.connect('http://metagrid2.sv.vt.edu:9999');
 
 /*
  * Initialized by client.js to get the user's name
@@ -70,10 +74,76 @@ function positionUpdated(e)
 	socket.emit('updateposition', name, pos, rot);
 }
 
+/*
+ * Sends the specified message to all connected users
+ */
+function sendMessage(memo) {
+	
+	var message = memo;
+	
+	if (message == null) {
+		
+		message = document.getElementById('inputField').value;
+		document.getElementById('inputField').value = "";
+		
+	}
+	
+	console.log("Sending a Message!");
+	socket.emit('chatmessage', name, message);
+	
+}
+
 //-----------------------------
 // Listeners
 //-----------------------------
 
+/*
+ * Minimize/Maximize Chat Widget
+ */
+window.onload = function (e) {
+	sendButton = document.getElementById("sendButton");
+	sendButton.addEventListener('click', sendMessage);
+	
+	smallForm = document.getElementById("smallForm");
+	formDiv = document.getElementById("chatWindow");
+    
+	formDiv.addEventListener('keypress', function(e) {
+		
+		if(e.keyCode == 13) {
+		
+			sendMessage();
+		
+		}
+	});
+	
+	var minButton = document.getElementById("minButton");
+    var maxButton = document.getElementById("maxButton");
+	
+	minButton.addEventListener('click', function(e) {
+		
+        if (formDiv.style.visibility != "hidden") {
+                               
+			formDiv.style.visibility = "hidden";
+			smallForm.style.visibility = "visible";
+			
+		}
+    });
+    
+    maxButton.addEventListener('click', function(e) {
+        
+        if (smallForm.style.visibility != 'hidden') {
+                               
+            smallForm.style.visibility = "hidden";
+            formDiv.style.visibility = "visible";
+                               
+        }
+    });
+}
+
+
+/*
+ * Change Camera View
+ */
 window.addEventListener('keypress', function(e) {
 	
 	var avatar = document.getElementById(name + "Avatar");
@@ -109,7 +179,7 @@ socket.on('connect', function()
  *
  * @param fullListOfUsers - the list of connected users
  */
-socket.on('firstupdate', function(fullListOfUsers)
+socket.once('firstupdate', function(fullListOfUsers)
 {
 	//Add your own Name and information to fullListOfUsers
 	if(fullListOfUsers[0] === undefined) {
@@ -117,7 +187,7 @@ socket.on('firstupdate', function(fullListOfUsers)
 		fullListOfUsers[name] = bundleObj;
 	
 	}
-	
+          
 	// Adds Avatar to X3D scene for new user
 	var avatarGroup = document.getElementById("avatarGroup");
 	avatarGroup.innerHTML = "";
@@ -148,12 +218,18 @@ socket.on('firstupdate', function(fullListOfUsers)
 			userBundle.setAttribute("id", key + "Bundle");
 			userBundle.setAttribute("translation", current[1].x + " " + current[1].y + " " + current[1].z);
 			userBundle.setAttribute("rotation", current[2][0].x + " " + current[2][0].y + " " + current[2][0].z + " " + current[2][1]);
+			myPos = current[1];
+			myRot = current[2];
 			
 			var scene = document.getElementsByTagName("Scene")[0];
 			
 			scene.appendChild(userBundle);
 			userBundle.appendChild(userAvatar);
-
+            
+            //Add a message to the chat window that someone is joining
+            var welcomeMessage = "" + name + " is joining the scene.";
+            socket.emit('newnote', welcomeMessage);
+            
 		} else {
 			avatarGroup.appendChild(userAvatar)
 		}
@@ -164,6 +240,8 @@ socket.on('firstupdate', function(fullListOfUsers)
 	
 	//Tell the server the user's spawn location data
 	socket.emit('login', name, spawnPosition, spawnOrientation);
+    
+
 });
 
 /*
@@ -260,4 +338,42 @@ socket.on('deleteuser', function(removableUser)
     
     //Remove User's HTML Content
     removeUser(removableUser);
+	
+	//Add a message to the chat window that someone is leaving
+    
+    //socket.emit('newnote', goodbyeNote);
+});
+
+/*
+ * Triggered when a message has been posted to the chatroom
+ *
+ */
+socket.on('newmessage', function(userName, message)
+{
+	var newMessage = document.createElement('li');
+	
+	var nameTag = document.createElement('span');
+	nameTag.innerHTML = "<em>" + userName + "</em>";
+	
+	newMessage.appendChild(nameTag);
+	newMessage.appendChild(document.createElement("br"));
+	newMessage.appendChild(document.createTextNode(message));
+	
+	document.getElementById("messages").appendChild(newMessage);
+});
+
+
+/*
+ * Triggered when a notification has been posted to the chatroom
+ */
+socket.on('notification', function(message) {
+	
+	var note = document.createElement('li');
+	
+	var noteText = document.createElement('span');
+	noteText.innerHTML = "<em>" + message + "</em>";
+    
+    note.appendChild(noteText);
+	
+	document.getElementById("messages").appendChild(note);
 });
