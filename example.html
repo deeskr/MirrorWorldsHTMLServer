@@ -19,8 +19,6 @@
 </head>
 
 <body onload = "init()">
-	<h1>Testing</h1>
-	
 	<div id='x3d'>
 		<X3D id="x3dContent">
 			<Scene>
@@ -77,17 +75,35 @@
 		<span id="users">Loading...</span>
 	</div>
 	
-    <div id="smallForm" style="visibility: hidden">
-        <button id="maxButton" class="minmaxB"><b> < </b></button>
-    </div>
-    
-	<div id="chatWindow" style="visibility: visible">
-        <button id="minButton" class="minmaxB"><b> > </b></button>
-        <div id="messageBlock">
-            <ul id="messages"></ul>
-            <input id="inputField" autocomplete="off" /><button id="sendButton">Send</button>
+    <div id="sidebar">
+        
+        <button id="maxButton" style="visibility: hidden" class="minmaxB"><b> < </b></button>
+        <button id="minButton" style="visibility: visible" class="minmaxB"><b> > </b></button>
+        
+            <div id="content" style="visibility: visible">
+                <br>
+                <span style="padding: 10px;">Toolbar</span>
+                <div id="toolbar">
+                    <span>Select an Avatar:<br></span>
+                    <select>
+                        <option value="warthog">Warthog</option>
+                        <option value="purple">Purple Warthog</option>
+                        <option value="green">Green Warthog</option>
+                        <option value="blue">Blue Warthog</option>
+                    </select>
+                </div>
+                
+            <span style="padding-left: 10px;">Scene Chat</span>
+            <div id="messageBlock">
+                <ul id="messages"></ul>
+                <input id="inputField" autocomplete="off" />
+                <button id="sendButton">Send</button>
+            </div>
         </div>
-	</div>
+        
+    </div>    
+    
+
         
 </body>
 </html>

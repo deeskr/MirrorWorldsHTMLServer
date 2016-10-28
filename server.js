@@ -19,7 +19,7 @@ var app = require('http').createServer(handler)
 
 var users = {}; //List of Connected Users
 
-app.listen(9999);
+app.listen(8888);
 
 /*
  * Handle incorrect Path Names for the server connection

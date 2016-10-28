@@ -21,10 +21,9 @@ var bundleObj;
 var myPos;
 var myRot;
 var sendButton;
-var formDiv;
 
 //Use for localhost testing. Run node server 
-socket = new io.connect('http://metagrid2.sv.vt.edu:9999');
+socket = new io.connect('http://metagrid2.sv.vt.edu:8888');
 
 /*
  * Initialized by client.js to get the user's name
@@ -103,9 +102,8 @@ function sendMessage(memo) {
 window.onload = function (e) {
 	sendButton = document.getElementById("sendButton");
 	sendButton.addEventListener('click', sendMessage);
-	
-	smallForm = document.getElementById("smallForm");
-	formDiv = document.getElementById("chatWindow");
+    
+	var formDiv = document.getElementById("inputField");
     
 	formDiv.addEventListener('keypress', function(e) {
 		
@@ -118,23 +116,26 @@ window.onload = function (e) {
 	
 	var minButton = document.getElementById("minButton");
     var maxButton = document.getElementById("maxButton");
-	
+    var sidebarContent = document.getElementById("content");
+    
 	minButton.addEventListener('click', function(e) {
 		
-        if (formDiv.style.visibility != "hidden") {
+        if (content.style.visibility != "hidden") {
                                
-			formDiv.style.visibility = "hidden";
-			smallForm.style.visibility = "visible";
+			content.style.visibility = "hidden";
+            minButton.style.visibility = "hidden";
+			maxButton.style.visibility = "visible";
 			
 		}
     });
     
     maxButton.addEventListener('click', function(e) {
         
-        if (smallForm.style.visibility != 'hidden') {
+        if (maxButton.style.visibility != 'hidden') {
                                
-            smallForm.style.visibility = "hidden";
-            formDiv.style.visibility = "visible";
+            maxButton.style.visibility = "hidden";
+            minButton.style.visibility = "visible";
+            content.style.visibility = "visible";
                                
         }
     });
@@ -205,7 +206,7 @@ socket.once('firstupdate', function(fullListOfUsers)
 		userAvatar.setAttribute("id", key + "Avatar"); 
 		console.log("created Node: " + userAvatar.getAttribute("id"));
 		var characterOfAvatar = document.createElement('inline');
-		characterOfAvatar.setAttribute("url", "avatars/pumbaPTrans1.x3d");
+		characterOfAvatar.setAttribute("url", "avatars/pumbaBlue.x3d");
 			
 		userAvatar.appendChild(characterOfAvatar);
 
@@ -309,7 +310,7 @@ socket.on('newuser', function(newestUser)
 		console.log("Created node: " + userAvatar.getAttribute("id"));
 
 		var inlineElement = document.createElement('inline');
-		inlineElement.setAttribute("url", "avatars/pumbaPTrans1.x3d");
+		inlineElement.setAttribute("url", "avatars/pumbaPurple.x3d");
 		
 		userAvatar.appendChild(inlineElement);
 		avatarGroup.appendChild(userAvatar);
