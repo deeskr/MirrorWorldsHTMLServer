@@ -18,12 +18,9 @@ var spawnPosition = {"x": 2, "y": 1.5, "z": 1};
 var spawnOrientation = [{"x": 0, "y": 1, "z": 0}, 0];
 var x3d;
 var bundleObj;
-var myPos;
-var myRot;
-var sendButton;
 
 //Use for localhost testing. Run node server 
-socket = new io.connect('http://metagrid2.sv.vt.edu:8888');
+socket = new io.connect('http://metagrid2.sv.vt.edu:9999');
 
 /*
  * Initialized by client.js to get the user's name
@@ -45,15 +42,18 @@ function configureScene()
 {
 	console.log("Scene Configured");
 	bundleObj = [name, spawnPosition, spawnOrientation];
+    
 	var camera = x3d.runtime.getActiveBindable("Viewpoint");
 	var cPos = "" + spawnPosition.x + " " + spawnPosition.y + " " + spawnPosition.z;
 	var cRot = "" + spawnOrientation[0].x + " " + spawnOrientation[0].y + " " + spawnOrientation[0].z + " " + spawnOrientation[1];
 	camera.setAttribute("position", cPos);
 	camera.setAttribute("orientation", cRot);
+    
 	var scene = document.getElementsByTagName("Scene")[0];
-	var g = document.createElement('Group');
-	g.setAttribute("id", "avatarGroup");
-	scene.appendChild(g);
+	var avatarGroup = document.createElement('Group');
+	avatarGroup.setAttribute("id", "avatarGroup");
+	scene.appendChild(avatarGroup);
+    
 	var cams = document.getElementsByTagName('Viewpoint');
 	for (var i = 0; i < cams.length; i++)
 	{
@@ -96,11 +96,8 @@ function sendMessage(memo) {
 // Listeners
 //-----------------------------
 
-/*
- * Minimize/Maximize Chat Widget
- */
 window.onload = function (e) {
-	sendButton = document.getElementById("sendButton");
+	var sendButton = document.getElementById("sendButton");
 	sendButton.addEventListener('click', sendMessage);
     
 	var formDiv = document.getElementById("inputField");
@@ -138,6 +135,15 @@ window.onload = function (e) {
             content.style.visibility = "visible";
                                
         }
+    });
+    
+    var selectAvatar = document.getElementById("selectAvatar");
+    
+    selectAvatar.addEventListener('change', function() {
+        
+        var value = selectAvatar.value;
+        
+        socket.emit('newavatar', name, value);
     });
 }
 
@@ -206,7 +212,8 @@ socket.once('firstupdate', function(fullListOfUsers)
 		userAvatar.setAttribute("id", key + "Avatar"); 
 		console.log("created Node: " + userAvatar.getAttribute("id"));
 		var characterOfAvatar = document.createElement('inline');
-		characterOfAvatar.setAttribute("url", "avatars/pumbaBlue.x3d");
+        characterOfAvatar.setAttribute("id", key + "Inline");
+		characterOfAvatar.setAttribute("url", "avatars/pumba.x3d");
 			
 		userAvatar.appendChild(characterOfAvatar);
 
@@ -241,7 +248,6 @@ socket.once('firstupdate', function(fullListOfUsers)
 	
 	//Tell the server the user's spawn location data
 	socket.emit('login', name, spawnPosition, spawnOrientation);
-    
 
 });
 
@@ -310,7 +316,8 @@ socket.on('newuser', function(newestUser)
 		console.log("Created node: " + userAvatar.getAttribute("id"));
 
 		var inlineElement = document.createElement('inline');
-		inlineElement.setAttribute("url", "avatars/pumbaPurple.x3d");
+        inlineElement.setAttribute("id", newestUser[0] + "Inline");
+		inlineElement.setAttribute("url", "avatars/pumba.x3d");
 		
 		userAvatar.appendChild(inlineElement);
 		avatarGroup.appendChild(userAvatar);
@@ -339,11 +346,35 @@ socket.on('deleteuser', function(removableUser)
     
     //Remove User's HTML Content
     removeUser(removableUser);
-	
-	//Add a message to the chat window that someone is leaving
-    
-    //socket.emit('newnote', goodbyeNote);
 });
+
+/*
+ * Triggered when someone changes their avatar
+ *
+ */
+socket.on('changeAvatar', function(userName, avatar) 
+{
+    var userAvatar = document.getElementById(userName + "Inline");
+    
+    switch (avatar) {
+            case 'warthog' :
+                userAvatar.setAttribute("url", "avatars/pumba.x3d");
+                break;
+                
+            case 'purple' :
+                userAvatar.setAttribute("url", "avatars/pumbaPurple.x3d");
+                break;
+    
+            case 'green' :
+                userAvatar.setAttribute("url", "avatars/pumbaGreen.x3d");
+                break;
+            
+            case 'blue' :
+                userAvatar.setAttribute("url", "avatars/pumbaBlue.x3d");
+                break;
+        }
+    
+})
 
 /*
  * Triggered when a message has been posted to the chatroom

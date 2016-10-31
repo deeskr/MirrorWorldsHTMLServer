@@ -19,7 +19,7 @@ var app = require('http').createServer(handler)
 
 var users = {}; //List of Connected Users
 
-app.listen(8888);
+app.listen(9999);
 
 /*
  * Handle incorrect Path Names for the server connection
@@ -83,6 +83,14 @@ io.on('connection', function (socket)
 	  io.emit('notification', message, users);
 	  
   });
+    
+ /*
+  * Recieved when a client changes their avatar
+  */
+  socket.on('newavatar', function(userName, avatar) {
+      console.log(userName + "has changed their avatar.");
+      io.emit('changeAvatar', userName, avatar);
+  });
  
  /*
   * Recieved when a new client has successfully updated
@@ -135,15 +143,16 @@ io.on('connection', function (socket)
   */
   socket.on('disconnect', function()
   {
-      console.log("Username: ", users[socket.username][0]);
+      if (users[socket.username] != null) {
       
-      var goodbyeNote = "" + users[socket.username][0] + " is leaving the scene.";
-	  io.emit('notification', goodbyeNote, users);
-      
-        // Inform all clients to update and account for the removed user.
-	  io.emit('deleteuser', users[socket.username]);
-      
-	  // Remove the client from the master list
-	  delete users[socket.username];
+          var goodbyeNote = "" + users[socket.username][0] + " is leaving the scene.";
+          io.emit('notification', goodbyeNote, users);
+
+            // Inform all clients to update and account for the removed user.
+          io.emit('deleteuser', users[socket.username]);
+
+          // Remove the client from the master list
+          delete users[socket.username];
+      }
   });
 });
