@@ -5,23 +5,24 @@
  * sends and receives updates as soon as they happen with no regard
  * to time since the last update.
  *
- * edited by: Karsten Dees, Nick Hu {09/16/2016}
+ * edited by: Karsten Dees, Nick Hu {11/04/2016}
  ******************************************************************/
  
-//-----------------------------
+//-------------------------------------------------------
 // Data Fields
-//-----------------------------
+//-------------------------------------------------------
  
-var name;
 var socket;
+var name;
 var spawnPosition = {"x": 2, "y": 1.5, "z": 1};
 var spawnOrientation = [{"x": 0, "y": 1, "z": 0}, 0];
+var avatarType = "avatars/pumba.x3d";
 var x3d;
-var bundleObj;
 
 //Use for localhost testing. Run node server 
 socket = new io.connect('http://metagrid2.sv.vt.edu:9999');
 
+//-------------------------------------------------------
 /*
  * Initialized by client.js to get the user's name
  * and set up the scene
@@ -33,27 +34,30 @@ function x3domWebsocketClient()
 	x3d = document.getElementsByTagName("X3D")[0];
 	
 	configureScene();
+    
+    configurePage();
 }
 
+//-------------------------------------------------------
 /*
  * Sets up the X3D scene
  */
 function configureScene()
 {
-	console.log("Scene Configured");
-	bundleObj = [name, spawnPosition, spawnOrientation];
-    
+    //Set up camera to provide location data
 	var camera = x3d.runtime.getActiveBindable("Viewpoint");
 	var cPos = "" + spawnPosition.x + " " + spawnPosition.y + " " + spawnPosition.z;
 	var cRot = "" + spawnOrientation[0].x + " " + spawnOrientation[0].y + " " + spawnOrientation[0].z + " " + spawnOrientation[1];
 	camera.setAttribute("position", cPos);
 	camera.setAttribute("orientation", cRot);
     
+    //Add Avatar Group for other users to the scene
 	var scene = document.getElementsByTagName("Scene")[0];
 	var avatarGroup = document.createElement('Group');
 	avatarGroup.setAttribute("id", "avatarGroup");
 	scene.appendChild(avatarGroup);
     
+    //Add listener to camera to update server with location data
 	var cams = document.getElementsByTagName('Viewpoint');
 	for (var i = 0; i < cams.length; i++)
 	{
@@ -61,43 +65,24 @@ function configureScene()
 	};
 }
 
+//-------------------------------------------------------
 /*
- * Sends position data to server
+ * Sets up chat window and user toolbar
  */
-function positionUpdated(e)
-{	
-    var pos = e.position;
-    var rot = e.orientation;
+function configurePage() 
+{
+    //Add listener to update server with avatar selection
+    var selectAvatar = document.getElementById("selectAvatar");
     
-    //Tell the server that this client has moved and send its new location data
-	socket.emit('updateposition', name, pos, rot);
-}
-
-/*
- * Sends the specified message to all connected users
- */
-function sendMessage(memo) {
-	
-	var message = memo;
-	
-	if (message == null) {
-		
-		message = document.getElementById('inputField').value;
-		document.getElementById('inputField').value = "";
-		
-	}
-	
-	console.log("Sending a Message!");
-	socket.emit('chatmessage', name, message);
-	
-}
-
-//-----------------------------
-// Listeners
-//-----------------------------
-
-window.onload = function (e) {
-	var sendButton = document.getElementById("sendButton");
+    selectAvatar.addEventListener('change', function() {
+        
+        var avatarType = selectAvatar.value;
+        
+        socket.emit('newavatar', name, avatarType);
+    });
+    
+    //Initialize buttons and listeners for chat function
+    var sendButton = document.getElementById("sendButton");
 	sendButton.addEventListener('click', sendMessage);
     
 	var formDiv = document.getElementById("inputField");
@@ -111,6 +96,7 @@ window.onload = function (e) {
 		}
 	});
 	
+    //Minimize and Maximize functionality for sidebar
 	var minButton = document.getElementById("minButton");
     var maxButton = document.getElementById("maxButton");
     var sidebarContent = document.getElementById("content");
@@ -137,49 +123,27 @@ window.onload = function (e) {
         }
     });
     
-    var selectAvatar = document.getElementById("selectAvatar");
+    //Add listener to lamp button
+    var lampToggle = document.getElementById("lampToggle");
     
-    selectAvatar.addEventListener('change', function() {
+    lampToggle.addEventListener('click', function(e)
+    {
+        console.log("You turned on the lamp!");
         
-        var value = selectAvatar.value;
-        
-        socket.emit('newavatar', name, value);
+        socket.emit('environmentChange');
     });
 }
 
-
+//-------------------------------------------------------
 /*
- * Change Camera View
- */
-window.addEventListener('keypress', function(e) {
-	
-	var avatar = document.getElementById(name + "Avatar");
-	
-	//pressed 1
-	if(e.keyCode === 49) {
-		
-		console.log("Change to First Person View");
-		avatar.setAttribute("translation", "" + 0 + " " + 0 + " " + 5);
-	}
-	//pressed 3
-	if(e.keyCode === 51) {
-		
-		console.log("Change to Third Person View");
-		var zPosition = -5;
-		
-		avatar.setAttribute("translation", "" + 0 + " " + 0 + " " + zPosition);
-	}
-});
-
-/*
- * Tell the server the user has successfully connected and 
- *to add this client to the list of all clients
+ * Tell the server the user has successfully connected
  */
 socket.on('connect', function()
 {
 	socket.emit('newconnection');
 });
 
+//-------------------------------------------------------
 /*
  * Received the first time this client connects to the server -- gets 
  * the client up to speed with all of the current data
@@ -188,46 +152,45 @@ socket.on('connect', function()
  */
 socket.once('firstupdate', function(fullListOfUsers)
 {
-	//Add your own Name and information to fullListOfUsers
+    
+    //Add your own Name and information to fullListOfUsers
 	if(fullListOfUsers[0] === undefined) {
 		
-		fullListOfUsers[name] = bundleObj;
+		fullListOfUsers[name] = [name, spawnPosition, spawnOrientation, avatarType];
 	
 	}
           
-	// Adds Avatar to X3D scene for new user
+	//Adds Avatar to X3D scene for new user
 	var avatarGroup = document.getElementById("avatarGroup");
 	avatarGroup.innerHTML = "";
-	
 	var scene = document.getElementsByTagName("Scene")[0];
-	for (var key in fullListOfUsers)
+	
+    for (var key in fullListOfUsers)
 	{
 		var current = fullListOfUsers[key];
-		//Adding yourself to the Scene
-	
+        
+        //Generate a Transform for key's avatar
 		var userAvatar = document.createElement('Transform');
-			
 		userAvatar.setAttribute("translation", "" + 0 + " " + 0 + " " + 5);
 		userAvatar.setAttribute("rotation", "" + 0 + " " + 0 + " " + 0 + " " + 0);
 		userAvatar.setAttribute("id", key + "Avatar"); 
-		console.log("created Node: " + userAvatar.getAttribute("id"));
+        
+        //Generate x3d model of avatar
 		var characterOfAvatar = document.createElement('inline');
         characterOfAvatar.setAttribute("id", key + "Inline");
-		characterOfAvatar.setAttribute("url", "avatars/pumba.x3d");
-			
+        
+        //current[3] == user's choice of avatar
+		characterOfAvatar.setAttribute("url", current[3]);
+        
+        //Add x3d model to the avatar Transform
 		userAvatar.appendChild(characterOfAvatar);
-
-		console.log("Name Actual: ", current[0]);
-		console.log("Name Expected: ", current[0]);
 		
+        //if adding self, add to a bundle with camera
 		if(current[0] == name) {
-			console.log("Creating my own UserBundle");
 			var userBundle = document.createElement('Transform');
 			userBundle.setAttribute("id", key + "Bundle");
 			userBundle.setAttribute("translation", current[1].x + " " + current[1].y + " " + current[1].z);
 			userBundle.setAttribute("rotation", current[2][0].x + " " + current[2][0].y + " " + current[2][0].z + " " + current[2][1]);
-			myPos = current[1];
-			myRot = current[2];
 			
 			var scene = document.getElementsByTagName("Scene")[0];
 			
@@ -238,7 +201,9 @@ socket.once('firstupdate', function(fullListOfUsers)
             var welcomeMessage = "" + name + " is joining the scene.";
             socket.emit('newnote', welcomeMessage);
             
-		} else {
+		} 
+        //if adding someone else, add them to the group of other avatars
+        else {
 			avatarGroup.appendChild(userAvatar)
 		}
 	}
@@ -246,11 +211,12 @@ socket.once('firstupdate', function(fullListOfUsers)
 	//Build the list of connected users
 	buildList(fullListOfUsers);
 	
-	//Tell the server the user's spawn location data
-	socket.emit('login', name, spawnPosition, spawnOrientation);
+	//Tell the server the user's spawn location data and default avatar
+	socket.emit('login', name, spawnPosition, spawnOrientation, avatarType);
 
 });
 
+//-------------------------------------------------------
 /*
  * Triggered whenever the user changes location 
  * to update the X3D scene and the HTML tags
@@ -259,38 +225,30 @@ socket.once('firstupdate', function(fullListOfUsers)
  */
 socket.on('update', function(updatedUser)
 {
-	//Get User Bundle Data
-	var userBundle = document.getElementById(updatedUser[0] + "Bundle");
+    var userTransform = document.getElementById(updatedUser[0] + "Bundle");
 	
-	// Get Avatar Data
-	var userAvatar = document.getElementById(updatedUser[0] + "Avatar");
-	
-	if(userBundle != null)
-	{
-		//Update Bundle Data
-		userBundle.setAttribute("translation", updatedUser[1].x + " " + updatedUser[1].y + " " + updatedUser[1].z);
-		userBundle.setAttribute("rotation", updatedUser[2][0].x + " " + updatedUser[2][0].y + " " + updatedUser[2][0].z + " " + updatedUser[2][1]);
-				
-        //Update HTML
-        updateList(updatedUser);
+    if (userTransform == null) {
+        
+        var userTransform = document.getElementById(updatedUser[0] + "Avatar");
+        
+        if (userTransform == null) {
+            return;
+        }
+    }
     
-        //Update Server Location Information
-        socket.emit('updatePosition', updatedUser[0], updatedUser[1], updatedUser[2]);
-	} else if(userAvatar != null)
-	{
-	
-		//Update Avatar Data
-		userAvatar.setAttribute("translation", updatedUser[1].x + " " + updatedUser[1].y + " " + updatedUser[1].z);
-		userAvatar.setAttribute("rotation", updatedUser[2][0].x + " " + updatedUser[2][0].y + " " + updatedUser[2][0].z + " " + updatedUser[2][1]);
+    userTransform .setAttribute("translation", updatedUser[1].x + " " + updatedUser[1].y + " " + updatedUser[1].z);
+    
+    userTransform .setAttribute("rotation", updatedUser[2][0].x + " " + updatedUser[2][0].y + " " + updatedUser[2][0].z + " " + updatedUser[2][1]);
 		
-        //Update HTML
-        updateList(updatedUser);
+    //Update HTML
+    updateList(updatedUser);
     
-        //Update Server Location Information
-        socket.emit('updatePosition', updatedUser[0], updatedUser[1], updatedUser[2]);
-	}
+    //Update Server Location Information
+    socket.emit('updatePosition', updatedUser[0], updatedUser[1], updatedUser[2]);
+    
 });
 
+//-------------------------------------------------------
 /*
  * Triggered whenever a new user connects -- updates 
  * all users with the added user's information
@@ -317,7 +275,7 @@ socket.on('newuser', function(newestUser)
 
 		var inlineElement = document.createElement('inline');
         inlineElement.setAttribute("id", newestUser[0] + "Inline");
-		inlineElement.setAttribute("url", "avatars/pumba.x3d");
+		inlineElement.setAttribute("url", newestUser[3]);
 		
 		userAvatar.appendChild(inlineElement);
 		avatarGroup.appendChild(userAvatar);
@@ -327,6 +285,7 @@ socket.on('newuser', function(newestUser)
 	}
 });
 
+//-------------------------------------------------------
 /*
  * Triggered whenever a user disconnects -- removes
  * the deleted user from everyone else's list
@@ -348,6 +307,7 @@ socket.on('deleteuser', function(removableUser)
     removeUser(removableUser);
 });
 
+//-------------------------------------------------------
 /*
  * Triggered when someone changes their avatar
  *
@@ -355,27 +315,11 @@ socket.on('deleteuser', function(removableUser)
 socket.on('changeAvatar', function(userName, avatar) 
 {
     var userAvatar = document.getElementById(userName + "Inline");
-    
-    switch (avatar) {
-            case 'warthog' :
-                userAvatar.setAttribute("url", "avatars/pumba.x3d");
-                break;
-                
-            case 'purple' :
-                userAvatar.setAttribute("url", "avatars/pumbaPurple.x3d");
-                break;
-    
-            case 'green' :
-                userAvatar.setAttribute("url", "avatars/pumbaGreen.x3d");
-                break;
-            
-            case 'blue' :
-                userAvatar.setAttribute("url", "avatars/pumbaBlue.x3d");
-                break;
-        }
+    userAvatar.setAttribute("url", avatar);
     
 })
 
+//-------------------------------------------------------
 /*
  * Triggered when a message has been posted to the chatroom
  *
@@ -394,7 +338,7 @@ socket.on('newmessage', function(userName, message)
 	document.getElementById("messages").appendChild(newMessage);
 });
 
-
+//-------------------------------------------------------
 /*
  * Triggered when a notification has been posted to the chatroom
  */
@@ -408,4 +352,79 @@ socket.on('notification', function(message) {
     note.appendChild(noteText);
 	
 	document.getElementById("messages").appendChild(note);
+});
+
+//-------------------------------------------------------
+/*
+ * Triggered when someone toggles the lamp in the scene
+ */
+socket.on('toggleLamp', function() {
+    
+    var lightBulb = document.getElementById("light");
+    var mat = lightBulb.getElementsByTagName("Material");
+    
+    var status = mat[0].getAttribute("diffuseColor");
+        
+    if (status == ".95, .9, .25") {
+        mat[0].setAttribute("diffuseColor", ".64 .69 .72");
+    } else {
+        mat[0].setAttribute("diffuseColor", ".95, .9, .25");
+    } 
+});
+
+//-------------------------------------------------------
+/*
+ * Sends position data to server
+ */
+function positionUpdated(e)
+{	
+    var pos = e.position;
+    var rot = e.orientation;
+    
+    //Tell the server that this client has moved and send new location data
+	socket.emit('updateposition', name, pos, rot, avatarType);
+}
+
+//-------------------------------------------------------
+/*
+ * Sends the specified message to all connected users in the chatroom
+ */
+function sendMessage(memo) {
+	
+	var message = memo;
+	
+	if (message == null) {
+		
+		message = document.getElementById('inputField').value;
+		document.getElementById('inputField').value = "";
+		
+	}
+	
+	console.log("Sending a Message!");
+	socket.emit('chatmessage', name, message);
+}
+
+//-------------------------------------------------------
+/*
+ * Toggle Camera View 
+ */
+window.addEventListener('keypress', function(e) {
+	
+	var avatar = document.getElementById(name + "Avatar");
+	
+	//Switch to first person view by pressing 1
+	if(e.keyCode === 49) {
+		
+		console.log("Change to First Person View");
+		avatar.setAttribute("translation", "" + 0 + " " + 0 + " " + 5);
+	}
+    
+	//Switch to third person view by pressing 3
+	if(e.keyCode === 51) {
+		
+		console.log("Change to Third Person View");
+		var zPosition = -5;
+		
+		avatar.setAttribute("translation", "" + 0 + " " + 0 + " " + zPosition);
+	}
 });

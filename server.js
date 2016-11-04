@@ -64,34 +64,6 @@ io.on('connection', function (socket)
 	}
   });
  
-  /*
-  * Recieved when a client sends a chat message
-  */
-  socket.on('chatmessage', function(name, message)
-  {
-	  console.log("Message Recieved: ", message);
-	  io.emit('newmessage', name, message);
-	  
-  });
-  
- /*
-  * Recieved when a client sends out a notification 
-  */
-  socket.on('newnote', function(message)
-  {
-	  console.log("Message Recieved: ", message);
-	  io.emit('notification', message, users);
-	  
-  });
-    
- /*
-  * Recieved when a client changes their avatar
-  */
-  socket.on('newavatar', function(userName, avatar) {
-      console.log(userName + "has changed their avatar.");
-      io.emit('changeAvatar', userName, avatar);
-  });
- 
  /*
   * Recieved when a new client has successfully updated
   * for the first time
@@ -100,13 +72,13 @@ io.on('connection', function (socket)
   * @param pos - client's start position in the scene
   * @param rot - client's start rotation in the scene
   */
-  socket.on('login', function(name, pos, rot)
+  socket.on('login', function(name, pos, rot, avatar)
   {
     console.log("New user '" + name + "' has connected.");
     
     socket.username = name;
     
-    users[name] = [name, pos, rot];
+    users[name] = [name, pos, rot, avatar];
 
     // Inform all clients to update and account for the new user.
 	try {
@@ -124,20 +96,65 @@ io.on('connection', function (socket)
   * @param pos - client's start position in the scene
   * @param rot - client's start rotation in the scene
   */
-  socket.on('updateposition', function(name, pos, rot)
-  {
-	  console.log("UpdatingPosition: ", name);
-    // Update the master list with the client's new location.
-    users[name] = [name, pos, rot];
-
-    // Inform all clients to update their scenes
-	try {
-		io.emit('update', users[name]);
-	} catch (e) {
-		console.log(e);
-	}
+  socket.on('updateposition', function(name, pos, rot, avatar)
+  {   
+      // Update the master list with the client's new location.
+      users[name] = [name, pos, rot, avatar];
+      
+      // Inform all clients to update their scenes
+      try {
+          io.emit('update', users[name]);
+      } catch (e) {
+          console.log(e);
+      }
   });
 
+ /*
+  * Recieved when a client sends a chat message
+  */
+  socket.on('chatmessage', function(name, message)
+  {
+	  io.emit('newmessage', name, message);
+	  
+  });
+  
+ /*
+  * Recieved when a client sends out a notification 
+  */
+  socket.on('newnote', function(message)
+  {
+	  io.emit('notification', message, users);
+	  
+  });
+    
+ /*
+  * Recieved when a client changes their avatar
+  */
+  socket.on('newavatar', function(name, avatar) {
+      console.log(name + "has changed their avatar.");
+      
+      //Preserve location data
+      var userPos = users[name][1];
+      console.log("Position: ", userPos);
+      var userRot = users[name][2];
+      console.log("Rotation: ", userRot);
+      
+      //Save avatar selection
+      users[name] = [name, userPos, userRot, avatar];
+      
+      //Tell clients about the avatar change
+      io.emit('changeAvatar', name, avatar);
+  });
+
+  /*
+  * Recieved when a client toggles the lamp
+  */  
+  socket.on('environmentChange', function() {
+      
+      io.emit('toggleLamp', users);
+      
+  });
+  
  /*
   * Recieved when a client disconnects (closes their browser window/tab).
   */
@@ -148,7 +165,7 @@ io.on('connection', function (socket)
           var goodbyeNote = "" + users[socket.username][0] + " is leaving the scene.";
           io.emit('notification', goodbyeNote, users);
 
-            // Inform all clients to update and account for the removed user.
+          // Inform all clients to update and account for the removed user.
           io.emit('deleteuser', users[socket.username]);
 
           // Remove the client from the master list
