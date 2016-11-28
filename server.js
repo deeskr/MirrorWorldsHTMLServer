@@ -5,7 +5,7 @@
  * sends and receives updates as soon as they happen with no regard
  * to time since the last update.
  *
- * edited by: Karsten Dees, Nick Hu {09/16/2016}
+ * edited by: Karsten Dees, Nick Hu {11/14/2016}
  *******************************************************************/
 
 //-----------------------------
@@ -18,6 +18,8 @@ var app = require('http').createServer(handler)
   , url = require('url')
 
 var users = {}; //List of Connected Users
+
+var environmentEvents = {}; //List of Enviromental Objects and their states
 
 app.listen(9999);
 

@@ -10,10 +10,6 @@
 	
 	<script src="https://cdn.socket.io/socket.io-1.0.0.js"></script>
 	<script src="client-object.js"></script>
-	<script src="client.js"></script>
-	<style>
-
-	</style>
 	
 
 </head>
@@ -94,7 +90,8 @@
                 </Transform>
                     
                 <Viewpoint id="firstPerson" set_bind="true" position='2 1.5 5' orientation='0 1 0 0'></Viewpoint>
-                <Viewpoint id="thirdPerson" position='2 1.5 -5' orientation='0 1 0 0'></Viewpoint>
+                    
+                <Group id="avatarGroup"></Group>
 			</Scene>
 		</X3D>
 	</div>
@@ -118,7 +115,7 @@
                     <span>Select an Avatar:<br></span>
                     <select id="selectAvatar">
                         <option value="avatars/pumba.x3d">Warthog</option>
-                        <option value="avatars/pumbaPurple.x3d">Purple Warthog</option>
+                        <option value="avatars/teapot.x3d">Teapot</option>
                         <option value="avatars/pumbaGreen.x3d">Green Warthog</option>
                         <option value="avatars/pumbaBlue.x3d">Blue Warthog</option>
                     </select>

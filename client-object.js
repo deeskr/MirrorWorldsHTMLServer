@@ -22,15 +22,13 @@ var x3d;
 //Use for localhost testing. Run node server 
 socket = new io.connect('http://metagrid2.sv.vt.edu:9999');
 
-//-------------------------------------------------------
 /*
- * Initialized by client.js to get the user's name
- * and set up the scene
+ * Start up client side operations
  */
-function x3domWebsocketClient()
-{
-	name = prompt("Enter your name:");
-
+function init()
+{ 
+    name = prompt("Enter your name:");
+    
 	x3d = document.getElementsByTagName("X3D")[0];
 	
 	configureScene();
@@ -51,18 +49,19 @@ function configureScene()
 	camera.setAttribute("position", cPos);
 	camera.setAttribute("orientation", cRot);
     
-    //Add Avatar Group for other users to the scene
-	var scene = document.getElementsByTagName("Scene")[0];
-	var avatarGroup = document.createElement('Group');
-	avatarGroup.setAttribute("id", "avatarGroup");
-	scene.appendChild(avatarGroup);
-    
     //Add listener to camera to update server with location data
-	var cams = document.getElementsByTagName('Viewpoint');
-	for (var i = 0; i < cams.length; i++)
-	{
-		cams[i].addEventListener('viewpointChanged', positionUpdated, false);
-	};
+	var cam = document.getElementById('firstPerson');
+	cam.addEventListener('viewpointChanged', positionUpdated);
+    
+    //Add listener to lamp button
+    var lampToggle = document.getElementById("lampToggle");
+    
+    lampToggle.addEventListener('click', function(e)
+    {
+        console.log("You toggled the lamp!");
+        
+        socket.emit('environmentChange');
+    });
 }
 
 //-------------------------------------------------------
@@ -86,13 +85,11 @@ function configurePage()
 	sendButton.addEventListener('click', sendMessage);
     
 	var formDiv = document.getElementById("inputField");
-    
 	formDiv.addEventListener('keypress', function(e) {
 		
 		if(e.keyCode == 13) {
 		
 			sendMessage();
-		
 		}
 	});
 	
@@ -121,16 +118,6 @@ function configurePage()
             content.style.visibility = "visible";
                                
         }
-    });
-    
-    //Add listener to lamp button
-    var lampToggle = document.getElementById("lampToggle");
-    
-    lampToggle.addEventListener('click', function(e)
-    {
-        console.log("You turned on the lamp!");
-        
-        socket.emit('environmentChange');
     });
 }
 
@@ -242,10 +229,6 @@ socket.on('update', function(updatedUser)
 		
     //Update HTML
     updateList(updatedUser);
-    
-    //Update Server Location Information
-    socket.emit('updatePosition', updatedUser[0], updatedUser[1], updatedUser[2]);
-    
 });
 
 //-------------------------------------------------------
@@ -428,3 +411,70 @@ window.addEventListener('keypress', function(e) {
 		avatar.setAttribute("translation", "" + 0 + " " + 0 + " " + zPosition);
 	}
 });
+
+//-----------------------------
+// HTML Manipulators
+//-----------------------------
+
+/*
+ * Builds HTML list of connected users
+ *
+ * @param fullListOfUsers - the list of connected users
+ */
+var buildList = function(fullListOfUsers)
+{
+	var userList = document.getElementById("users");
+	userList.innerHTML = "";
+
+	//Add each user to the HTML list
+	for (var key in fullListOfUsers)
+	{
+		var current = fullListOfUsers[key];
+		var userListEntry = document.createElement('span');
+		var newPLine = document.createElement('p');
+		userListEntry.setAttribute("id", key);
+		userListEntry.innerHTML = (key + " observing at: " + current[1].x + ", " + current[1].y + ", " + current[1].z);
+		userList.appendChild(newPLine);					
+		userList.appendChild(userListEntry);
+	}
+}
+
+/*
+ * Adds a new user to the HTML list of users
+ *
+ * @param newestUser - user to be added to the list
+ */
+var addUser = function(newestUser)
+{
+	console.log("Adding User: ", newestUser[0]);
+	var userList = document.getElementById("users");
+	var userListEntry = document.createElement('span');
+	var newPLine = document.createElement('p');
+	userListEntry.setAttribute("id", newestUser[0]);
+	userListEntry.innerHTML = (newestUser[0] + " observing at: " + newestUser[1].x + ", " + newestUser[1].y + ", " + newestUser[1].z);
+	userList.appendChild(newPLine);
+	userList.appendChild(userListEntry);
+}
+
+/*
+ * Removes a user from the HTML list of users
+ *
+ * @param goodbyeUser - user to be deleted
+ */
+var removeUser = function(goodbyeUser)
+{
+	var users = document.getElementById("users");
+	var remove2 = document.getElementById(goodbyeUser[0]);
+	users.removeChild(remove2);
+}
+
+/*
+ * Updates the HTML list with new position data
+ *
+ * @param updateUser - the updated user
+ */
+var updateList = function(updateUser)
+{
+	var target = document.getElementById(updateUser[0]);
+	target.innerHTML = (updateUser[0] + " observing at: " + updateUser[1].x + ", " + updateUser[1].y + ", " + updateUser[1].z);
+}
