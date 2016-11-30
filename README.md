@@ -21,3 +21,6 @@ Bugs:
 - Random semi colon in the middle of the x3d scene
 - Headlights on avatars (should be fixed when we add new avatars)
 - Teapot needs a material
+
+Thoughts and Ideas:
+- Abstract Factories in Node: http://thenodeway.io/posts/designing-factories/
