@@ -4,23 +4,18 @@
 	<title>X3DOM server testing</title>
 	<meta encoding="utf-8">
 	
+    <script src="EnviroObject.js"></script>
 	<script type='text/javascript' src='http://www.x3dom.org/download/x3dom.js'> </script> 
     <link rel='stylesheet' type='text/css' href='http://www.x3dom.org/download/x3dom.css'></link>
 	<link rel="stylesheet" type="text/css" href="client.css">
 	
 	<script src="https://cdn.socket.io/socket.io-1.0.0.js"></script>
 	<script src="client-object.js"></script>
-	<script src="client.js"></script>
-	<style>
-
-	</style>
 	
 
 </head>
 
 <body onload = "init()">
-	<h1>Testing</h1>
-	
 	<div id='x3d'>
 		<X3D id="x3dContent">
 			<Scene>
@@ -33,7 +28,7 @@
                     </Shape>
                 </Transform>
                 <Transform DEF='dad_Box3' translation='14 2.5 14'>
-                    <Shape DEF='Box3' containerField='children'>
+                    <Shape DEF='Box3' id='Box3' containerField='children'>
                         <Appearance containerField='appearance'>
                             <Material DEF='Red' containerField='material' ambientIntensity='.2' shininess='.2' diffuseColor='1 0 0'/>
                         </Appearance>
@@ -64,8 +59,71 @@
                         <Box DEF='GeoBox5' containerField='geometry' size='2 12 2'/>
                     </Shape>
                 </Transform>
+                <Transform DEF='dad_Lamp' translation='-8 4 -8'>
+                    <Shape DEF='LampPost' containerField='children'>
+                        <Appearance containerField='appearance'>
+                            <Material DEF='Grayish' containerField='material' ambientIntensity='.2' shininess='.2' diffuseColor='.54 .59 .62'/>
+                        </Appearance>
+                        <Cylinder DEF='LampCylinder' containerField='geometry' height='8' radius='.2'></Cylinder>
+                    </Shape>
+                    <Transform DEF='dad_Bulb' translation='0 4 0'>
+                        <Shape DEF='light' id="lamp1" containerField='children'>
+                            <Appearance containerField='appearance'>
+                                <Material DEF='Yellow' containerField='material' ambientIntensity='.2' shininess='.1' diffuseColor='.95, .9, .25'/>
+                            </Appearance>
+                            <Sphere DEF='LampBulb' containerField='geometry' radius='.7'/>
+                        </Shape>
+                    </Transform>
+                    <Transform DEF='dad_Button' translation='0 -.5 .15' rotation='.5 0 0 1.5' bboxsize='1, 1, 1'>
+                        <Shape DEF='button' containerField='children'>
+                            <Appearance containerField='appearance'>
+                                <Material DEF='Gray' containerField='material' ambientIntensity='.2' shininess='.1' diffuseColor='.95, .9, .25'/>
+                            </Appearance>
+                            <Cylinder DEF='LampButton' containerField='geometry' radius='.1' height='.25'/>
+                        </Shape>
+                        <Shape id='lampToggle'>
+                            <Appearance>
+                                <Material containerField='material' transparency='1'/>
+                            </Appearance>
+                            <Sphere radius='1'/>
+                        </Shape>
+                    </Transform>
+                </Transform>
+                    
+                <Transform DEF='dad_Lamp2' translation='8 4 -8'>
+                    <Shape DEF='LampPost2' containerField='children'>
+                        <Appearance containerField='appearance'>
+                            <Material DEF='Grayish' containerField='material' ambientIntensity='.2' shininess='.2' diffuseColor='.54 .59 .62'/>
+                        </Appearance>
+                        <Cylinder DEF='LampCylinder2' containerField='geometry' height='8' radius='.2'></Cylinder>
+                    </Shape>
+                    <Transform DEF='dad_Bulb2' translation='0 4 0'>
+                        <Shape DEF='light2' id="lamp2" containerField='children'>
+                            <Appearance containerField='appearance'>
+                                <Material DEF='Yellow' containerField='material' ambientIntensity='.2' shininess='.1' diffuseColor='.95, .9, .25'/>
+                            </Appearance>
+                            <Sphere DEF='LampBulb2' containerField='geometry' radius='.7'/>
+                        </Shape>
+                    </Transform>
+                    <Transform DEF='dad_Button2' translation='0 -.5 .15' rotation='.5 0 0 1.5' bboxsize='1, 1, 1'>
+                        <Shape DEF='button'2 containerField='children'>
+                            <Appearance containerField='appearance'>
+                                <Material DEF='Gray' containerField='material' ambientIntensity='.2' shininess='.1' diffuseColor='.95, .9, .25'/>
+                            </Appearance>
+                            <Cylinder DEF='LampButton' containerField='geometry' radius='.1' height='.25'/>
+                        </Shape>
+                        <Shape id='lampToggle2'>
+                            <Appearance>
+                                <Material containerField='material' transparency='1'/>
+                            </Appearance>
+                            <Sphere radius='1'/>
+                        </Shape>
+                    </Transform>
+                </Transform>
+                    
                 <Viewpoint id="firstPerson" set_bind="true" position='2 1.5 5' orientation='0 1 0 0'></Viewpoint>
-                <Viewpoint id="thirdPerson" position='2 1.5 -5' orientation='0 1 0 0'></Viewpoint>
+                    
+                <Group id="avatarGroup"></Group>
 			</Scene>
 		</X3D>
 	</div>
@@ -77,17 +135,32 @@
 		<span id="users">Loading...</span>
 	</div>
 	
-    <div id="smallForm" style="visibility: hidden">
-        <button id="maxButton" class="minmaxB"><b> < </b></button>
-    </div>
-    
-	<div id="chatWindow" style="visibility: visible">
-        <button id="minButton" class="minmaxB"><b> > </b></button>
-        <div id="messageBlock">
-            <ul id="messages"></ul>
-            <input id="inputField" autocomplete="off" /><button id="sendButton">Send</button>
-        </div>
-	</div>
+    <div id="sidebar">
         
+        <button id="maxButton" style="visibility: hidden" class="minmaxB"><b> < </b></button>
+        <button id="minButton" style="visibility: visible" class="minmaxB"><b> > </b></button>
+        
+            <div id="content" style="visibility: visible">
+                <br>
+                <span style="padding: 10px;">Toolbar</span>
+                <div id="toolbar">
+                    <span>Select an Avatar:<br></span>
+                    <select id="selectAvatar">
+                        <option value="avatars/pumba.x3d">Warthog</option>
+                        <option value="avatars/teapot.x3d">Teapot</option>
+                        <option value="avatars/pumbaGreen.x3d">Green Warthog</option>
+                        <option value="avatars/pumbaBlue.x3d">Blue Warthog</option>
+                    </select>
+                </div>
+                
+            <span style="padding-left: 10px;">Scene Chat</span>
+            <div id="messageBlock">
+                <ul id="messages"></ul>
+                <input id="inputField" autocomplete="off" />
+                <button id="sendButton">Send</button>
+            </div>
+        </div>
+        
+    </div>    
 </body>
 </html>
