@@ -1,5 +1,46 @@
+
+/* We have 2 run cases: 
+ *
+ *   1. running mw_server from some where else where it's installed:
+ *
+ *     - mw_server can be in your PATH, and can run many instances
+ *
+ *   2. running mw_server from the source directory:
+ *
+ *     - Easier for development
+ *
+ * Both these two cases need to be tested to make a release.
+ *
+ * We also keep it so that if a user wishes to they may move the whole
+ * installed directory tree to a different directory and still be able to
+ * use it without any changes to any file.  They just need to keep the
+ * installed files with all their relative paths the same.  To make this
+ * so, we require that all these projects files must not depend on the
+ * absolute path, at least at startup time, and the path to other
+ * installed project files must be computed from __dirname in this file,
+ * or be a relative path (not full path).
+ *
+ * Hence the structure of the source files is the same as the installed
+ * files.
+ *
+ * In nodeJS __dirname resolves symlinks to the real full path.  That's
+ * just what it does, so we work with it.
+ */
+
+
+/* config is define above then this program spliced together via 'make'. */
+
+/* command line and environment optional configuration override some
+ * config values via this local 'options' module. */
+config = require("../lib/options").parse(config);
+
+
+console.log(
+        "config.text = " + config.text);
+
+
 /*******************************************************************
- * Implemntation of multi-user X3DOM - server side.
+ * Implementation of multi-user X3DOM - server side.
  * author: Matthew Bock
  * This version focuses on minimizing data transfer, but it still
  * sends and receives updates as soon as they happen with no regard
@@ -11,17 +52,18 @@
 //-----------------------------
 // Data Fields
 //-----------------------------
- 
-var app = require('http').createServer(handler)
-  , io = require('socket.io').listen(app)
+
+var path = require('path')
+  , app = require('http').createServer(handler)
+  , io = require('../lib/node_modules/socket.io').listen(app)
   , fs = require('fs')
-  , url = require('url')
+  , url = require('url');
 
 var users = {}; //List of Connected Users
 
-var environmentEvents = {}; //List of Enviromental Objects and their states
+var environmentEvents = {}; //List of Environmental Objects and their states
 
-app.listen(9999);
+app.listen(config.port);
 
 /*
  * Handle incorrect Path Names for the server connection
@@ -32,11 +74,11 @@ app.listen(9999);
 function handler (req, res) 
 {
   var pathname = url.parse(req.url).pathname;
-  fs.readFile(__dirname + pathname,
+  fs.readFile(config.public + pathname,
   function (err, data) {
     if (err) {
       res.writeHead(500);
-      return res.end('Error loading' + pathname);
+      return res.end('Error loading ' + pathname);
     }
 
     res.writeHead(200);
@@ -53,7 +95,7 @@ io.on('connection', function (socket)
 { 
 
  /*
-  * Recieved when a new client opens a websocket connection succesfully
+  * Received when a new client opens a WebSocket connection successfully
   */
   socket.on('newconnection', function()
   {
@@ -67,7 +109,7 @@ io.on('connection', function (socket)
   });
  
  /*
-  * Recieved when a new client has successfully updated
+  * Received when a new client has successfully updated
   * for the first time
   *
   * @param name - client's username
@@ -91,7 +133,7 @@ io.on('connection', function (socket)
   });
 
  /*
-  * Recieved when the client has changed the position
+  * Received when the client has changed the position
   * of their avatar
   *
   * @param name - client's username
@@ -112,7 +154,7 @@ io.on('connection', function (socket)
   });
 
  /*
-  * Recieved when a client sends a chat message
+  * Received when a client sends a chat message
   */
   socket.on('chatmessage', function(name, message)
   {
@@ -121,7 +163,7 @@ io.on('connection', function (socket)
   });
   
  /*
-  * Recieved when a client sends out a notification 
+  * Received when a client sends out a notification 
   */
   socket.on('newnote', function(message)
   {
@@ -130,7 +172,7 @@ io.on('connection', function (socket)
   });
     
  /*
-  * Recieved when a client changes their avatar
+  * Received when a client changes their avatar
   */
   socket.on('newavatar', function(name, avatar) {
       console.log(name + "has changed their avatar.");
@@ -149,7 +191,7 @@ io.on('connection', function (socket)
   });
 
   /*
-  * Recieved when a client toggles the lamp
+  * Received when a client toggles the lamp
   */  
   socket.on('environmentChange', function() {
       
@@ -158,13 +200,14 @@ io.on('connection', function (socket)
   });
   
  /*
-  * Recieved when a client disconnects (closes their browser window/tab).
+  * Received when a client disconnects (closes their browser window/tab).
   */
   socket.on('disconnect', function()
   {
-      if (users[socket.username] != null) {
+    if (users[socket.username] != null) {
       
-          var goodbyeNote = "" + users[socket.username][0] + " is leaving the scene.";
+          var goodbyeNote = "" + users[socket.username][0] +
+            " is leaving the scene.";
           io.emit('notification', goodbyeNote, users);
 
           // Inform all clients to update and account for the removed user.

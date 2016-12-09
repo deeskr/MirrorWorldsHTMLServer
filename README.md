@@ -1,5 +1,19 @@
 # MirrorWorldsHTMLServer
 
+
+
+## Package Dependences
+
+
+### nodeJS
+
+### yui-compressor (optional, build-time only)
+
+
+
+
+## Developer Notes
+
 Finished:
 - socket connection
 - chat function
@@ -17,10 +31,15 @@ Future Milestones:
 
 Bugs:
 
-- When a new user connects and there are already users in the scene, the new user isn’t seeing where everybody really is at first. All other users are being rendered from the spawn location
+- When a new user connects and there are already users in the scene, the
+  new user isn’t seeing where everybody really is at first. All other
+  users are being rendered from the spawn location
 - Random semi colon in the middle of the x3d scene
 - Headlights on avatars (should be fixed when we add new avatars)
 - Teapot needs a material
 
 Thoughts and Ideas:
-- Abstract Factories in Node: http://thenodeway.io/posts/designing-factories/
+- Abstract Factories in Node:
+  http://thenodeway.io/posts/designing-factories/
+
+
