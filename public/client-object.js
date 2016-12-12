@@ -1,3 +1,4 @@
+// This is a generated file
 /*******************************************************************
  * Implemntation of multi-user X3DOM - client side.
  * author: Matthew Bock
