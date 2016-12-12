@@ -66,36 +66,37 @@ function usage()
   ----------------------------------------------------------------------
 
 
-  --no-compress         do not apply yui-compressor to installed installed
-                        javascript and CSS files.  The default is compress
-                        if yui-compressor is found when this script runs,
-                        otherwise not
+  --no-compress      do not apply yui-compressor to installed installed
+                     javascript and CSS files.  The default is compress
+                     if yui-compressor is found when this script runs,
+                     otherwise not
 
-  --node NPATH          set the full file path to the node (js) executable.
-                        By default $prog will set the node server script
-                        to run with #!/usr/bin/env node , when NPATH is
-                        set it will be #!NPATH
+  --node NPATH       set the full file path to the node.js executable.
+                     By default $prog will set the node server script
+                     to run with #!/usr/bin/env node , when NPATH is
+                     set it will be #!NPATH
 
-  --prefix PREFIX       set the installation directory prefix the current
-                        default PREFIX is CURRENT_DIR/installed
+  --prefix PREFIX    set the installation directory prefix the current
+                     default PREFIX is "installed/" in the current
+                     directory.
 
-  --port PORT           set the default HTTP and WebSockets server port
-                        to PORT.  The default value is 9999
+  --port PORT        set the default HTTP and WebSockets server port
+                     to PORT.  The default value is 9999
 
-  --s_port SPORT        set the default HTTPS and secure WebSockets server
-                        port to SPORT.  The default value is 4443
+  --s_port SPORT     set the default HTTPS and secure WebSockets server
+                     port to SPORT.  The default value is 4443
 
 
 
   For example in a bash shell run:
 
-     ./configure --prefix=/usr/local/packageXXX && make && make install
+     ./configure --prefix=/usr/local/mirrorworlds && make && make install
 
 
 EOF
     exit 1
-
 }
+
 
 if which yui-compressor > /dev/null ; then
     # These may get changed via user optional args below.

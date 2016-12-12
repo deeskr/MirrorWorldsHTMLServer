@@ -1,6 +1,11 @@
 # MirrorWorldsHTMLServer
 
 
+## Ports
+
+Currently being developed on GNU/Linux systems: Debian 8.6, and Xubuntu
+16.04.  It is expected to work on most GNU/Linux systems.
+
 
 ## Package Dependences
 
@@ -10,6 +15,22 @@
 ### yui-compressor (optional, build-time only)
 
 
+## Installing
+
+It builds and installs using GNU make and bash.  In a bash shell, from
+the directory with this README file is, run:
+
+
+```
+./configure --prefix=/INSTALLATION/PREFIX && make && make install
+```
+
+See:
+
+```
+./configure --help
+```
+for more configuration options.
 
 
 ## Developer Notes
