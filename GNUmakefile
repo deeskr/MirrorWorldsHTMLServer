@@ -41,15 +41,13 @@ BIN = $(PREFIX)/bin
 ETC = $(PREFIX)/etc
 
 # Files that this package installs that are seen on the web.
-PUBLIC = $(ETC)/public
-
-mw_server = bin/mw_server
+PUBLIC = $(PREFIX)/public
 
 
 #######################################################################
 #######################################################################
 
-# We'll get needed nodejs modules from package.json
+# We'll get needed nodejs modules from lib/package.json
 # and put them in this directory
 node_modules = lib/node_modules
 
@@ -75,8 +73,8 @@ etc_files = $(keys)
 
 
 built_files = $(sort\
- $(mw_server)\
- mw_server\
+ bin\
+ mw_server lib/mw_server bin/mw_server\
  $(built_js_files)\
  $(built_css_files)\
  $(keys)\
@@ -99,23 +97,34 @@ $(node_modules):
 config.make:
 	echo "# This is a generated file" > $@
 
-mw_server: $(mw_server)
-	ln -s $(mw_server) $@
+bin:
+	mkdir -p bin
 
-$(mw_server): server.js GNUmakefile config.make
-	(mkdir -p bin &&\
+bin/mw_server: bin
+	mkdir -p bin
+	ln -s ../lib/mw_server $@
+
+mw_server:
+	ln -s lib/mw_server $@
+
+lib/mw_server: lib/mw_server.js GNUmakefile config.make
+	(mkdir -p lib &&\
 	echo "$(shabang)" > $@ &&\
         echo "// This is a generated file" >> $@ &&\
-        echo "/****** Configuration defaults ******/" >> $@ &&\
+	echo "// build date: $(build_date)" >> $@ &&\
+        echo "/****** Built configurated defaults ******/" >> $@ &&\
         echo "var config = {};" >> $@ &&\
-        echo "config.port = \"$(port)\";" >> $@ &&\
-        echo "config.s_port = \"$(s_port)\";" >> $@ &&\
-        echo "config.build_date = \"$(build_date)\";" >> $@ &&\
-        for i in server.js ; do echo "$(sep)// START $$i" >> $@; cat $$i >> $@; done &&\
+        echo "config.http_port = \"$(port)\";" >> $@ &&\
+        echo "config.https_port = \"$(s_port)\";" >> $@ &&\
+        for i in lib/mw_server.js ; do echo "$(sep)// START $$i" >> $@;\
+	cat $$i >> $@; done &&\
         chmod 755 $@) || (rm -f $@ ; rmdir bin ; exit 1)
 
+etc:
+	mkdir etc
+
 # ref: http://superuser.com/questions/226192/openssl-without-prompt
-$(keys):
+$(keys): etc
 	openssl req\
  -new\
  -nodes\
@@ -143,12 +152,13 @@ mkdirs:
 
 install: mkdirs build
 	cp  -r $(etc_files) $(ETC)/
-	cp -r $(mw_server) $(BIN)/
+	cp $(mw_server) $(BIN)/
 	cp -r lib/ $(PREFIX)/lib
 	cp -r $(public_files) $(PUBLIC)/
+	rm $(PREFIX)/lib/mw_server.js
 
 clean:
-	rm -rf $(built_files) bin
+	rm -rf $(built_files) bin etc isolate-*-v8.log
 
 distclean: clean
 	rm -f config.make
