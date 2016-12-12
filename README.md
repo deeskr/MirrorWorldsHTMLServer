@@ -24,6 +24,8 @@ the directory with this README file is, run:
 ```
 ./configure --prefix=/INSTALLATION/PREFIX && make && make install
 ```
+where ```/INSTALLATION/PREFIX``` the directory to install all the
+installed files.
 
 See:
 
@@ -31,6 +33,13 @@ See:
 ./configure --help
 ```
 for more configuration options.
+
+## Running the server
+
+The Mirror Worlds server is installed as mw_server in the directory
+```PREFIX/bin/```.  Run
+```mw_server --help```
+for help.
 
 
 ## Developer Notes
