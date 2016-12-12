@@ -25,7 +25,8 @@ the directory with this README file is, run:
 ./configure --prefix=/INSTALLATION/PREFIX && make && make install
 ```
 where ```/INSTALLATION/PREFIX``` the directory to install all the
-installed files.
+installed files.  Running ```make``` the first time will download
+files from the Internet via ```npm``` and ```wget```.
 
 See:
 
