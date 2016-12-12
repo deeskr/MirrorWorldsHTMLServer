@@ -206,9 +206,10 @@ function removeUser(goodbyeUser)
  */
 function updateList(updateUser)
 {
-    var target.document.getElementById(updateUser[0]).innerHTML =
-	(updateUser[0] + " observing at: " + updateUser[1].x +
-	", " + updateUser[1].y + ", " + updateUser[1].z);
+   document.getElementById(updateUser[0]).innerHTML = 
+		(updateUser[0] + " observing at: " +
+		updateUser[1].x + ", " + updateUser[1].y + 
+		", " + updateUser[1].z);
 }
 
 /*
