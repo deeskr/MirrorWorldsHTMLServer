@@ -22,13 +22,13 @@ cd "$(dirname $0)"
 
 # The software will not run if the node dependencies
 # are not gotten.
-if [ ! -d node_modules ] ; then
+if [ ! -d lib/node_modules ] ; then
     make
-    make install
 fi
 
+http_port=9999
 
-./mw_server &
+./mw_server --http_port=$http_port &
 
 if [ "$?" != 0 ] ; then
     echo "failed to start server"
@@ -38,8 +38,8 @@ PID=$!
 
 count=0
 # Try to connect to the server
-while ! nc -z -v -w 4 localhost 9999 ; do
-    echo "($count) Server is not listening on port 9999 yet"
+while ! nc -z -v -w 4 localhost $http_port ; do
+    echo "($count) Server is not listening on port $http_port yet"
     let count=$count+1
     if [ $count = 4 ] ; then
         exit 1
@@ -48,8 +48,8 @@ while ! nc -z -v -w 4 localhost 9999 ; do
 done
 
 # run some browser clients
-xdg-open http://localhost:9999/example.html &
-xdg-open http://localhost:9999/example.html &
+xdg-open http://localhost:$http_port/example.html &
+xdg-open http://localhost:$http_port/example.html &
 
 
 while wait $PID ; do
