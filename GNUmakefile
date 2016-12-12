@@ -151,10 +151,9 @@ mkdirs:
 	mkdir -p $(ETC) $(BIN) $(PUBLIC) $(MODULES)
 
 install: mkdirs build
-	cp  -r $(etc_files) $(ETC)/
-	cp $(mw_server) $(BIN)/
-	cp -r lib/ $(PREFIX)/lib
-	cp -r $(public_files) $(PUBLIC)/
+	cp -R $(etc_files) $(ETC)/
+	cp -R lib/ $(PREFIX)/lib
+	cp -R $(public_files) $(PUBLIC)/
 	rm $(PREFIX)/lib/mw_server.js
 
 clean:
